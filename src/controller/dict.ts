@@ -3,9 +3,9 @@ import * as qs from "qs";
 import * as md5 from "crypto-js/md5";
 import * as sha256 from "crypto-js/sha256";
 import { baiduConfig, youdaoConfig } from "../../config.local";
-import { save } from "../service/dict";
+import DictService from "../service/dict";
 
-// import { Context } from "koa";
+const dictService = new DictService();
 
 const baiduParams = {
   url: "https://fanyi-api.baidu.com/api/trans/vip/translate",
@@ -86,7 +86,7 @@ export default class DictController {
         to,
         trans_result: [{ src, dst }],
       } = data;
-      save({
+      dictService.save({
         type: "baidu",
         from,
         to,
@@ -107,25 +107,27 @@ export default class DictController {
 
     try {
       const { status, data } = await axios.get(`${fullUrl}`);
-      const {
-        query,
-        translation,
-        l,
-        webdict,
-      } = data;
-      
-      
-      const [from, to] = l.split('2');
-      save({
+      const { query, translation, l, webdict } = data;
+
+      const [from, to] = l.split("2");
+      dictService.save({
         type: "youdao",
         from,
         to,
         query,
-        translation: translation.join(','),
+        translation: translation.join(","),
         time: new Date(),
         link: webdict.url,
       });
       ctx.response.body = data;
+    } catch (e) {
+      ctx.response.body = e;
+    }
+  }
+
+  async findAll(ctx, next) {
+    try {
+      ctx.response.body = await dictService.findAll();
     } catch (e) {
       ctx.response.body = e;
     }

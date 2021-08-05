@@ -8,6 +8,8 @@ router.get("/baidu/:word", dict.getBaiduDict);
 
 router.get("/youdao/:word", dict.getYoudaoDict);
 
+router.get("/dict/all", dict.findAll);
+
 router.get("/", async (ctx, next) => {
   ctx.response.body = "<h1>dict</h1>";
 });

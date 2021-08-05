@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { createConnection, getConnection, getRepository  } from "typeorm";
+import { getConnection } from "typeorm";
 import { Dict } from "../entity/Dict";
 
 interface DictItem {
@@ -12,18 +12,25 @@ interface DictItem {
   link?: string;
 }
 
+export default class DictService {
+  async save(item: DictItem) {
+    const dict = new Dict();
+    Object.entries(item).forEach(([key, value]) => {
+      dict[key] = value;
+    });
 
-// TODO 后续移动到 app.ts 中
-createConnection();
-
-
-export const save = async (item: DictItem) => {
-  const dict = new Dict();
-  Object.entries(item).forEach(([key, value]) => {
-    dict[key] = value;
-  });
-
-  await getConnection().manager.save(dict);
-};
-
-export class DictService {}
+    try {
+      await getConnection().manager.save(dict);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+  
+  async findAll() {
+    try {
+      return await getConnection().createQueryBuilder().select('dict').from(Dict, 'dict').getMany();
+    } catch (e) {
+      console.log(e);
+    }
+  }
+}
