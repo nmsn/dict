@@ -20,6 +20,11 @@ export class Dict {
   @Column()
   to: string;
 
+  @Column({
+    default: "",
+  })
+  link: string;
+
   @Column()
   time: Date;
 }

@@ -2,7 +2,8 @@ import axios from "axios";
 import * as qs from "qs";
 import * as md5 from "crypto-js/md5";
 import * as sha256 from "crypto-js/sha256";
-import { baiduConfig, youdaoConfig } from "../../config.local.js";
+import { baiduConfig, youdaoConfig } from "../../config.local";
+import { save } from "../service/dict";
 
 // import { Context } from "koa";
 
@@ -67,8 +68,6 @@ const getYoudaoUrl = (word: string) => {
     curtime: now,
   };
 
-  console.log(params);
-
   const qsBody = qs.stringify(params);
 
   return `${url}?${qsBody}`;
@@ -83,8 +82,18 @@ export default class DictController {
     try {
       const { status, data } = await axios.get(`${fullUrl}`);
       const {
+        from,
+        to,
         trans_result: [{ src, dst }],
       } = data;
+      save({
+        type: "baidu",
+        from,
+        to,
+        query: src,
+        translation: dst,
+        time: new Date(),
+      });
       ctx.response.body = data;
     } catch (e) {
       ctx.response.body = e;
@@ -98,6 +107,24 @@ export default class DictController {
 
     try {
       const { status, data } = await axios.get(`${fullUrl}`);
+      const {
+        query,
+        translation,
+        l,
+        webdict,
+      } = data;
+      
+      
+      const [from, to] = l.split('2');
+      save({
+        type: "youdao",
+        from,
+        to,
+        query,
+        translation: translation.join(','),
+        time: new Date(),
+        link: webdict.url,
+      });
       ctx.response.body = data;
     } catch (e) {
       ctx.response.body = e;
