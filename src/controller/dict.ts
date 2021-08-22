@@ -73,57 +73,74 @@ const getYoudaoUrl = (word: string) => {
   return `${url}?${qsBody}`;
 };
 
+const getFullUrl = (type: 'baidu' | 'youdao', word: string) => {
+  return type === 'baidu' ? getBaiduUrl(word) : getYoudaoUrl(word);
+};
+
+const reqBaidu = async (ctx: any, fullUrl: string) => {
+  try {
+    const { status, data } = await axios.get(`${fullUrl}`);
+    const {
+      from,
+      to,
+      trans_result: [{ src, dst }],
+    } = data;
+    dictService.save({
+      type: "baidu",
+      from,
+      to,
+      query: src,
+      translation: dst,
+      time: new Date(),
+    });
+    ctx.response.body = data;
+  } catch (e) {
+    ctx.response.body = e;
+  }
+};
+
+const reqYoudao = async (ctx: any, fullUrl: string) => {
+  try {
+    const { status, data } = await axios.get(`${fullUrl}`);
+    const { query, translation, l, webdict } = data;
+
+    const [from, to] = l.split("2");
+    dictService.save({
+      type: "youdao",
+      from,
+      to,
+      query,
+      translation: translation.join(","),
+      time: new Date(),
+      link: webdict.url,
+    });
+    ctx.response.body = data;
+  } catch (e) {
+    ctx.response.body = e;
+  }
+};
+
 export default class DictController {
   async getBaiduDict(ctx, next) {
     const { word } = ctx.params;
-
-    const fullUrl = getBaiduUrl(word);
-
-    try {
-      const { status, data } = await axios.get(`${fullUrl}`);
-      const {
-        from,
-        to,
-        trans_result: [{ src, dst }],
-      } = data;
-      dictService.save({
-        type: "baidu",
-        from,
-        to,
-        query: src,
-        translation: dst,
-        time: new Date(),
-      });
-      ctx.response.body = data;
-    } catch (e) {
-      ctx.response.body = e;
-    }
+    await reqBaidu(ctx, getFullUrl('baidu', word));
+  }
+  
+  async postBaiduDict(ctx, next) {
+    const { word } = ctx.request.body;
+    await reqBaidu(ctx, getFullUrl('baidu', word));
   }
 
   async getYoudaoDict(ctx, next) {
     const { word } = ctx.params;
-
-    const fullUrl = getYoudaoUrl(word);
-
-    try {
-      const { status, data } = await axios.get(`${fullUrl}`);
-      const { query, translation, l, webdict } = data;
-
-      const [from, to] = l.split("2");
-      dictService.save({
-        type: "youdao",
-        from,
-        to,
-        query,
-        translation: translation.join(","),
-        time: new Date(),
-        link: webdict.url,
-      });
-      ctx.response.body = data;
-    } catch (e) {
-      ctx.response.body = e;
-    }
+    await reqYoudao(ctx, getFullUrl('youdao', word));
   }
+  
+  async postYoudaoDict(ctx, next) {
+    const { word } = ctx.request.body;
+    await reqYoudao(ctx, getFullUrl('youdao', word));
+  }
+
 
   async findAll(ctx, next) {
     try {

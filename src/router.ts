@@ -6,7 +6,11 @@ const dict = new DictController();
 
 router.get("/baidu/:word", dict.getBaiduDict);
 
+router.post('/baiduSearch', dict.postBaiduDict)
+
 router.get("/youdao/:word", dict.getYoudaoDict);
+
+router.post('/youdaoSearch', dict.postYoudaoDict)
 
 router.get("/dict/all", dict.findAll);
 
