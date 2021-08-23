@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/nmsn/dict#readme",
   "dependencies": {
+    "@koa/cors": "^3.1.0",
     "axios": "^0.21.1",
     "crypto-js": "^4.0.0",
     "koa": "^2.13.1",
