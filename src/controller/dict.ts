@@ -73,8 +73,8 @@ const getYoudaoUrl = (word: string) => {
   return `${url}?${qsBody}`;
 };
 
-const getFullUrl = (type: 'baidu' | 'youdao', word: string) => {
-  return type === 'baidu' ? getBaiduUrl(word) : getYoudaoUrl(word);
+const getFullUrl = (type: "baidu" | "youdao", word: string) => {
+  return type === "baidu" ? getBaiduUrl(word) : getYoudaoUrl(word);
 };
 
 const reqBaidu = async (ctx: any, fullUrl: string) => {
@@ -99,6 +99,32 @@ const reqBaidu = async (ctx: any, fullUrl: string) => {
   }
 };
 
+const getBaiduWord = async (fullUrl: string) => {
+  try {
+    const { status, data } = await axios.get(`${fullUrl}`);
+    const {
+      from,
+      to,
+      trans_result: [{ src, dst }],
+    } = data;
+
+    const result = {
+      type: "baidu",
+      from,
+      to,
+      query: src,
+      translation: dst,
+      time: new Date(),
+    };
+
+    dictService.save(result);
+
+    return result;
+  } catch (e) {
+    return e;
+  }
+};
+
 const reqYoudao = async (ctx: any, fullUrl: string) => {
   try {
     const { status, data } = await axios.get(`${fullUrl}`);
@@ -120,27 +146,48 @@ const reqYoudao = async (ctx: any, fullUrl: string) => {
   }
 };
 
+const getYoudaoWord = async (fullUrl: string) => {
+  try {
+    const { status, data } = await axios.get(`${fullUrl}`);
+    const { query, translation, l, webdict } = data;
+
+    const [from, to] = l.split("2");
+    const result = {
+      type: "youdao",
+      from,
+      to,
+      query,
+      translation: translation.join(","),
+      time: new Date(),
+      link: webdict.url,
+    };
+    dictService.save(result);
+    return result;
+  } catch (e) {
+    return e;
+  }
+};
+
 export default class DictController {
   async getBaiduDict(ctx, next) {
     const { word } = ctx.params;
-    await reqBaidu(ctx, getFullUrl('baidu', word));
-  }
-  
-  async postBaiduDict(ctx, next) {
-    const { word } = ctx.request.body;
-    await reqBaidu(ctx, getFullUrl('baidu', word));
+    await reqBaidu(ctx, getFullUrl("baidu", word));
   }
 
   async getYoudaoDict(ctx, next) {
     const { word } = ctx.params;
-    await reqYoudao(ctx, getFullUrl('youdao', word));
-  }
-  
-  async postYoudaoDict(ctx, next) {
-    const { word } = ctx.request.body;
-    await reqYoudao(ctx, getFullUrl('youdao', word));
+    await reqYoudao(ctx, getFullUrl("youdao", word));
   }
 
+  async getWord(ctx, next) {
+    const { word } = ctx.request.body;
+    const [youdao, baidu] = await Promise.all([
+      getYoudaoWord(getFullUrl("youdao", word)),
+      getBaiduWord(getFullUrl("baidu", word)),
+    ]);
+
+    ctx.success({ youdao, baidu });
+  }
 
   async findAll(ctx, next) {
     try {

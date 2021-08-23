@@ -5,13 +5,8 @@ const router = new Router();
 const dict = new DictController();
 
 router.get("/baidu/:word", dict.getBaiduDict);
-
-router.post('/baiduSearch', dict.postBaiduDict)
-
 router.get("/youdao/:word", dict.getYoudaoDict);
-
-router.post('/youdaoSearch', dict.postYoudaoDict)
-
+router.post("/dict/word", dict.getWord);
 router.get("/dict/all", dict.findAll);
 
 router.get("/", async (ctx, next) => {
