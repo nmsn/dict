@@ -200,4 +200,38 @@ export default class DictController {
       ctx.response.body = e;
     }
   }
+  
+  async findAllCurMonth(ctx, next) {
+    try {
+      ctx.response.body = await dictService.findAllCurMonth();
+    } catch (e) {
+      ctx.response.body = e;
+    }
+  }
+  
+  async findAllCurWeek(ctx, next) {
+    try {
+      ctx.response.body = await dictService.findAllCurWeek();
+    } catch (e) {
+      ctx.response.body = e;
+    }
+  }
+  
+  async findAllType(ctx, next) {
+    try {
+      const { type } = ctx.params;
+      ctx.response.body = await dictService.findAllType(type);
+    } catch (e) {
+      ctx.response.body = e;
+    }
+  }
+  
+  async findGroup(ctx, next) {
+    try {
+      const { type } = ctx.params;
+      ctx.response.body = await dictService.findGroup();
+    } catch (e) {
+      ctx.response.body = e;
+    }
+  }
 }
