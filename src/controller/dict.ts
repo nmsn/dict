@@ -4,6 +4,7 @@ import * as md5 from "crypto-js/md5";
 import * as sha256 from "crypto-js/sha256";
 import { baiduConfig, youdaoConfig } from "../../config.local";
 import DictService from "../service/dict";
+import { EOVERFLOW } from "constants";
 
 const dictService = new DictService();
 
@@ -181,12 +182,15 @@ export default class DictController {
 
   async getWord(ctx, next) {
     const { word } = ctx.request.body;
-    const [youdao, baidu] = await Promise.all([
-      getYoudaoWord(getFullUrl("youdao", word)),
-      getBaiduWord(getFullUrl("baidu", word)),
-    ]);
-
-    ctx.success({ youdao, baidu });
+    try {
+      const [youdao, baidu] = await Promise.all([
+        getYoudaoWord(getFullUrl("youdao", word)),
+        getBaiduWord(getFullUrl("baidu", word)),
+      ]);
+      ctx.success([youdao, baidu]);
+    } catch (e) {
+      ctx.fail("Request Failed", 404);
+    }
   }
 
   async findAll(ctx, next) {

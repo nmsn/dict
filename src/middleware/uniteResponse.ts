@@ -31,7 +31,6 @@ const uniteResponse = (option: OptionProps = {}) => {
     };
 
     ctx.fail = function (msg, code) {
-      console.log(msg);
       ctx.status = code || option.failCode || 400;
       ctx.type = option.type || "json";
       ctx.body = {

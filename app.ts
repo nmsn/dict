@@ -11,7 +11,6 @@ app.use(cors());
 app.use(async (ctx, next) => {
   console.log(`Process ${ctx.request.method} ${ctx.request.url}...`);
   await next();
-  console.log(ctx);
 });
 app.use(bodyParser());
 app.use(uniteResponse());
