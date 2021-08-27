@@ -200,7 +200,7 @@ export default class DictController {
       ctx.response.body = e;
     }
   }
-  
+
   async findAllCurMonth(ctx, next) {
     try {
       ctx.response.body = await dictService.findAllCurMonth();
@@ -208,7 +208,7 @@ export default class DictController {
       ctx.response.body = e;
     }
   }
-  
+
   async findAllCurWeek(ctx, next) {
     try {
       ctx.response.body = await dictService.findAllCurWeek();
@@ -216,7 +216,7 @@ export default class DictController {
       ctx.response.body = e;
     }
   }
-  
+
   async findAllType(ctx, next) {
     try {
       const { type } = ctx.params;
@@ -225,13 +225,26 @@ export default class DictController {
       ctx.response.body = e;
     }
   }
-  
+
   async findGroup(ctx, next) {
     try {
       const { type } = ctx.params;
-      ctx.response.body = await dictService.findGroup();
+      ctx.response.body = await dictService.findGroup(type);
     } catch (e) {
       ctx.response.body = e;
+    }
+  }
+
+  async findGroupStatByTime(ctx, next) {
+    const { timeType, num } = ctx.params;
+    try {
+      const [youdao, baidu] = await Promise.all([
+        dictService.findGroupStatByTime("youdao", timeType, num),
+        dictService.findGroupStatByTime("baidu", timeType, num),
+      ]);
+      ctx.success({ youdao, baidu });
+    } catch (e) {
+      ctx.fail("Request Failed", 404);
     }
   }
 }

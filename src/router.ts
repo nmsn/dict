@@ -11,7 +11,8 @@ router.get("/dict/all", dict.findAll);
 router.get("/dict/allMonth", dict.findAllCurMonth);
 router.get("/dict/allWeek", dict.findAllCurWeek);
 router.get("/dict/allType/:type", dict.findAllType);
-router.get("/dict/group", dict.findGroup);
+router.get("/dict/group/:type", dict.findGroup);
+router.get("/dict/groupStat/:timeType/:num", dict.findGroupStatByTime);
 
 router.get("/", async (ctx, next) => {
   ctx.response.body = "<h1>dict</h1>";
