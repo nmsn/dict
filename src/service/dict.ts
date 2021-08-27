@@ -86,19 +86,18 @@ export default class DictService {
 
   async findGroup() {
     try {
-      return await getConnection()
-        .createQueryBuilder()
-        .select("dict.query", "asdasd")
-        // .addSelect("dict.id")
-        // .addSelect("COUNT(dict.query)")
-        //  .addSelect("dict.query", "a")
-        // .addSelect("COUNT(dict.query)")
-        // .groupBy("dict.query")
-        .from(Dict, "dict")
-        // .orderBy("dict.id", "DESC")
-        .getMany();
+      const result = await getConnection()
+      .createQueryBuilder()
+      .select("dict.query", 'query')
+      .addSelect("COUNT(*)", 'count')
+      .from(Dict, "dict")
+      .groupBy("dict.query")
+      .getRawMany();
+      // getMany 只能获取实体数据 sum count 等需要用 getRawMany
+      return result;
     } catch (e) {
       console.log(e);
     }
   }
+  
 }
